@@ -30,7 +30,7 @@ contract Exchange is ERC20 {
         uint lpTokenAmount
     ) public returns (uint etherAmount, uint tokenAmount) {
         // Implemented in removing liquidity with fair share of Ether and Tokens.
-        uint totalLiquidity = balanceOf(address(this));
+        uint totalLiquidity = totalSupply();
         ERC20 token = ERC20(tokenAddress);
         etherAmount = address(this).balance * lpTokenAmount / totalLiquidity;
         tokenAmount = token.balanceOf(address(this)) * lpTokenAmount / totalLiquidity;
