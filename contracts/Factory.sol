@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import "./Exchange.sol";
 
 
-contract UniswapFactory {
+contract Factory {
     event NewExchange(
         address indexed token,
         address indexed exchange
