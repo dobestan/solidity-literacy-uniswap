@@ -16,11 +16,30 @@ contract Exchange is ERC20 {
 
     function addLiquidity(
     ) public payable returns (uint lpTokenAmount) {
+        // Implmented in adding liquidity with same amount of Ether and Tokens.
+        uint etherAmount = msg.value;
+        uint tokenAmount = etherAmount;
+        ERC20 token = ERC20(tokenAddress);
+        token.transferFrom(msg.sender, address(this), tokenAmount);
+        lpTokenAmount = etherAmount;
+        _mint(msg.sender, lpTokenAmount);
+        return lpTokenAmount;
     }
 
     function removeLiquidity(
         uint lpTokenAmount
-    ) public returns (uint etherAmount, uint TokenAmount) {
+    ) public returns (uint etherAmount, uint tokenAmount) {
+        // Implemented in removing liquidity with fair share of Ether and Tokens.
+        uint totalLiquidity = balanceOf(address(this));
+        ERC20 token = ERC20(tokenAddress);
+        etherAmount = address(this).balance * lpTokenAmount / totalLiquidity;
+        tokenAmount = token.balanceOf(address(this)) * lpTokenAmount / totalLiquidity;
+
+        _burn(msg.sender, lpTokenAmount);
+        payable(msg.sender).transfer(etherAmount);
+        token.transfer(msg.sender, tokenAmount);
+
+        return (etherAmount, tokenAmount);
     }
 
     function getInputPrice(
