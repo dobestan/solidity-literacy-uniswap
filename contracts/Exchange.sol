@@ -46,6 +46,7 @@ contract Exchange is ERC20 {
     function etherToTokenInput(
         uint minTokens
     ) public payable returns (uint tokensBought) {
+        // Price Discovery
         uint etherSold = msg.value;
         ERC20 token = ERC20(tokenAddress);
         tokensBought = getInputPrice(
@@ -53,9 +54,13 @@ contract Exchange is ERC20 {
             address(this).balance - msg.value,
             token.balanceOf(address(this))
         );
+
+        // Validity
+        require(tokensBought >= minTokens);
+        
+        // Transfer
         token.transfer(msg.sender, tokensBought);
 
-        require(tokensBought >= minTokens);
         return tokensBought;
     }
 
@@ -63,18 +68,25 @@ contract Exchange is ERC20 {
         uint tokensBought,
         uint maxEther
     ) public payable returns (uint etherSold) {
+        // Price Discovery
         ERC20 token = ERC20(tokenAddress);
         etherSold = getOutputPrice(
             tokensBought,
             address(this).balance - msg.value,
             token.balanceOf(address(this))
         );
+
+        // Validity Check
         require(msg.value >= etherSold);
         require(maxEther >= etherSold);
+
+        // Refund
         uint etherRefundAmount = msg.value - etherSold;
         if (etherRefundAmount > 0) {
             payable(msg.sender).transfer(etherRefundAmount);
         }
+
+        // Transfer
         token.transfer(msg.sender, tokensBought);
         return etherSold;
     }
@@ -83,11 +95,43 @@ contract Exchange is ERC20 {
         uint tokensSold,
         uint minEther
     ) public returns (uint etherBought) {
+        // Price Discovery
+        ERC20 token = ERC20(tokenAddress);
+        etherBought = getInputPrice(
+            tokensSold,
+            token.balanceOf(address(this)),
+            address(this).balance
+        );
+
+        // Validity Check
+        require(etherBought >= minEther);
+
+        // Transfer
+        token.transferFrom(msg.sender, address(this), tokensSold);
+        payable(msg.sender).transfer(etherBought);
+
+        return etherBought;
     }
 
     function tokenToEtherOutput(
         uint etherBought,
         uint maxTokens
     ) public returns (uint tokensSold) {
+        // Price Discovery
+        ERC20 token = ERC20(tokenAddress);
+        tokensSold = getOutputPrice(
+            etherBought,
+            token.balanceOf(address(this)),
+            address(this).balance
+        );
+
+        // Validity Check
+        require(maxTokens >= tokensSold);
+
+        // Transfer
+        token.transferFrom(msg.sender, address(this), tokensSold);
+        payable(msg.sender).transfer(etherBought);
+
+        return tokensSold;
     }
 }
