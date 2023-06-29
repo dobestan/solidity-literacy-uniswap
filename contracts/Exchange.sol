@@ -23,16 +23,29 @@ contract Exchange is ERC20 {
     ) public returns (uint etherAmount, uint TokenAmount) {
     }
 
+    function getInputPrice(
+        uint inputAmount,
+        uint inputReserve,
+        uint outputReserve
+    ) public pure returns (uint outputAmount) {
+        outputAmount = inputAmount * 997 / 1000;
+        // Implemented in CSMM Price Discovery Method.
+        // #TODO: Should change to CPMM.
+    }
+
     function etherToTokenInput(
         uint minTokens
     ) public payable returns (uint tokensBought) {
         uint etherSold = msg.value;
-        tokensBought = etherSold * 997 / 1000;
-        require(tokensBought >= minTokens);
-
         ERC20 token = ERC20(tokenAddress);
+        tokensBought = getInputPrice(
+            etherSold, 
+            address(this).balance - msg.value,
+            token.balanceOf(address(this))
+        );
         token.transfer(msg.sender, tokensBought);
 
+        require(tokensBought >= minTokens);
         return tokensBought;
     }
 
