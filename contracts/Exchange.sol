@@ -53,6 +53,16 @@ contract Exchange is ERC20 {
         uint tokensBought,
         uint maxEther
     ) public payable returns (uint etherSold) {
+        etherSold = tokensBought * 1000 / 997;  // #TODO: Refactor via getOutputPrice
+        require(msg.value >= etherSold);
+        require(maxEther >= etherSold);
+        uint etherRefundAmount = msg.value - etherSold;
+        if (etherRefundAmount > 0) {
+            payable(msg.sender).transfer(etherRefundAmount);
+        }
+        ERC20 token = ERC20(tokenAddress);
+        token.transfer(msg.sender, tokensBought);
+        return etherSold;
     }
 
     function tokenToEtherInput(
