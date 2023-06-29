@@ -33,6 +33,21 @@ describe("Exchange", function () {
 
       expect(outputAmount).to.equal(inputAmount.mul(997).div(1000));
     });
+
+    it("Should calculate 'output price' correctly", async function () {
+      // (X, Y) = (100, 100)
+      const outputAmount = ethers.utils.parseEther("1.0");
+      const inputReserve = ethers.utils.parseEther("100.0");
+      const outputReserve = ethers.utils.parseEther("100.0");
+
+      const inputAmount = await exchange.getOutputPrice(
+        outputAmount,
+        inputReserve,
+        outputReserve
+      );
+
+      expect(inputAmount).to.equal(outputAmount.mul(1000).div(997));
+    });
   });
 
   describe("Swap Features", function () {
