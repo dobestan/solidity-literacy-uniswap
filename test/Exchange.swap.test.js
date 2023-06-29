@@ -18,8 +18,8 @@ describe("Exchange:Swap Features", function () {
     await token.deployed();
     
     // Mint initial balances to user1 and user2
-    await token.mint(user1.address, ethers.utils.parseEther("50"));
-    await token.mint(user2.address, ethers.utils.parseEther("50"));
+    await token.mint(user1.address, ethers.utils.parseEther("1000"));
+    await token.mint(user2.address, ethers.utils.parseEther("1000"));
 
     // Deploy Exchange
     const Exchange = await ethers.getContractFactory("Exchange");
@@ -27,12 +27,20 @@ describe("Exchange:Swap Features", function () {
     await exchange.deployed();
 
     // Approve transfer of token for exchange
-    await token.connect(user1).approve(exchange.address, ethers.utils.parseEther("50"));
-    await token.connect(user2).approve(exchange.address, ethers.utils.parseEther("50"));
+    await token.connect(user1).approve(exchange.address, ethers.utils.parseEther("500"));
+    await token.connect(user2).approve(exchange.address, ethers.utils.parseEther("500"));
 
-    // Provide initial liquidity
-    await exchange.connect(user1).addLiquidity({ value: ethers.utils.parseEther("50") });
-    await exchange.connect(user2).addLiquidity({ value: ethers.utils.parseEther("50") });
+    // Provide initial liquidity(each 5 Eth, 50 Tokens)
+    await exchange.connect(user1).addLiquidity(
+      ethers.utils.parseEther("50"),
+      ethers.utils.parseEther("500"),
+      {value: ethers.utils.parseEther("50")}
+    );
+    await exchange.connect(user2).addLiquidity(
+      ethers.utils.parseEther("50"),
+      ethers.utils.parseEther("500"),
+      {value: ethers.utils.parseEther("50")}
+    );
   });
 
   describe("etherToTokenInput", function () {
