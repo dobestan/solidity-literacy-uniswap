@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-deploy");
 
 
 module.exports = {
@@ -10,5 +11,8 @@ module.exports = {
                 `${process.env.PRIVATE_KEY}`,
             ],
         },
+    },
+    etherscan: {
+        apiKey: `${process.env.ETHERSCAN_API_KEY}`
     },
 };

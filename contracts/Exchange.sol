@@ -8,6 +8,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Exchange is ERC20 {
     address public tokenAddress;
 
+    event TokenPurchase(address indexed buyer, uint256 indexed etherSold, uint256 indexed tokensBought);
+    event EtherPurchase(address indexed buyer, uint256 indexed tokensSold, uint256 indexed etherBought);
+    event AddLiquidity(address indexed provider, uint256 indexed etherAmount, uint256 indexed tokenAmount);
+    event RemoveLiquidity(address indexed provider, uint256 indexed etherAmount, uint256 indexed tokenAmount);
+
+
     constructor(
         address _tokenAddress
     ) ERC20("Uniswap V1", "UNI-V1") {
@@ -29,6 +35,7 @@ contract Exchange is ERC20 {
             token.transferFrom(msg.sender, address(this), tokenAmount);
 
             _mint(msg.sender, lpTokenAmount);
+            emit AddLiquidity(msg.sender, etherAmount, tokenAmount);
             
             return lpTokenAmount;
         } else {
@@ -46,6 +53,7 @@ contract Exchange is ERC20 {
             token.transferFrom(msg.sender, address(this), tokenAmount);
 
             _mint(msg.sender, lpTokenAmount);
+            emit AddLiquidity(msg.sender, msg.value, tokenAmount);
 
             return lpTokenAmount;
         }
@@ -63,6 +71,8 @@ contract Exchange is ERC20 {
         _burn(msg.sender, lpTokenAmount);
         payable(msg.sender).transfer(etherAmount);
         token.transfer(msg.sender, tokenAmount);
+        
+        emit RemoveLiquidity(msg.sender, etherAmount, tokenAmount);
 
         return (etherAmount, tokenAmount);
     }
@@ -107,6 +117,9 @@ contract Exchange is ERC20 {
         // Transfer
         token.transfer(msg.sender, tokensBought);
 
+        // Events
+        emit TokenPurchase(msg.sender, etherSold, tokensBought);
+
         return tokensBought;
     }
 
@@ -134,6 +147,10 @@ contract Exchange is ERC20 {
 
         // Transfer
         token.transfer(msg.sender, tokensBought);
+
+        // Events
+        emit TokenPurchase(msg.sender, etherSold, tokensBought);
+
         return etherSold;
     }
 
@@ -156,6 +173,9 @@ contract Exchange is ERC20 {
         token.transferFrom(msg.sender, address(this), tokensSold);
         payable(msg.sender).transfer(etherBought);
 
+        // Events
+        emit EtherPurchase(msg.sender, tokensSold, etherBought);
+
         return etherBought;
     }
 
@@ -177,6 +197,9 @@ contract Exchange is ERC20 {
         // Transfer
         token.transferFrom(msg.sender, address(this), tokensSold);
         payable(msg.sender).transfer(etherBought);
+
+        // Events
+        emit EtherPurchase(msg.sender, tokensSold, etherBought);
 
         return tokensSold;
     }
