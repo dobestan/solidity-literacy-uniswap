@@ -83,9 +83,10 @@ contract Exchange is ERC20 {
         uint inputReserve,
         uint outputReserve
     ) public pure returns (uint inputAmount) {
-        inputAmount = outputAmount * 1000 / 997;
-        // Implemented in CSMM Price Discovery Method.
-        // #TODO: Should change to CPMM.
+        uint numerator = inputReserve * outputAmount;
+        uint denominator = outputReserve - outputAmount;
+        uint inputAmountWithoutFee = numerator / denominator;
+        inputAmount = inputAmountWithoutFee * 1000 / 967;
     }
 
     function etherToTokenInput(
