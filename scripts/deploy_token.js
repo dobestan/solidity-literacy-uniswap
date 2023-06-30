@@ -1,6 +1,3 @@
-const hre = require("hardhat");
-
-
 async function main() {
     const name = "TestToken";
     const symbol = "TT";
@@ -12,6 +9,7 @@ async function main() {
 
     console.log(`${name} deployed to:`, token.address);
 }
+
 
 main()
     .then(() => process.exit(0))
