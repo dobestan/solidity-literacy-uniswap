@@ -11,7 +11,6 @@ contract Factory {
         address indexed exchange
     );
 
-    address public exchangeTemplate;
     uint public tokenCount;
 
     mapping (address tokenAddress => address exchangeAddress) internal tokenToExchange;
