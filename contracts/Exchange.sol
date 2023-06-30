@@ -15,15 +15,40 @@ contract Exchange is ERC20 {
     }
 
     function addLiquidity(
+        uint minLpTokenAmount,
+        uint maxTokenAmount
     ) public payable returns (uint lpTokenAmount) {
-        // Implmented in adding liquidity with same amount of Ether and Tokens.
-        uint etherAmount = msg.value;
-        uint tokenAmount = etherAmount;
         ERC20 token = ERC20(tokenAddress);
-        token.transferFrom(msg.sender, address(this), tokenAmount);
-        lpTokenAmount = etherAmount;
-        _mint(msg.sender, lpTokenAmount);
-        return lpTokenAmount;
+        uint totalLiquidity = totalSupply();
+
+        if (totalLiquidity == 0) {
+            // Initial Liquidity: (msg.value, maxTokenAmount)
+            uint etherAmount = msg.value;
+            uint tokenAmount = maxTokenAmount;
+            lpTokenAmount = etherAmount;
+            token.transferFrom(msg.sender, address(this), tokenAmount);
+
+            _mint(msg.sender, lpTokenAmount);
+            
+            return lpTokenAmount;
+        } else {
+            // Liquidity Exists: (etherReserve, tokenReserve)
+            uint etherReserve = address(this).balance - msg.value;
+            uint tokenReserve = token.balanceOf(address(this));
+            
+            // (Share) = msg.value / etherReserve
+            lpTokenAmount = totalLiquidity * msg.value / etherReserve;
+            uint tokenAmount = tokenReserve * msg.value / etherReserve;
+            
+            require(lpTokenAmount >= minLpTokenAmount);
+            require(maxTokenAmount >= tokenAmount);
+
+            token.transferFrom(msg.sender, address(this), tokenAmount);
+
+            _mint(msg.sender, lpTokenAmount);
+
+            return lpTokenAmount;
+        }
     }
 
     function removeLiquidity(
@@ -47,9 +72,10 @@ contract Exchange is ERC20 {
         uint inputReserve,
         uint outputReserve
     ) public pure returns (uint outputAmount) {
-        outputAmount = inputAmount * 997 / 1000;
-        // Implemented in CSMM Price Discovery Method.
-        // #TODO: Should change to CPMM.
+        uint numerator = inputAmount * outputReserve;
+        uint denominator = inputAmount + inputReserve;
+        uint outputAmountWithFee = numerator / denominator;
+        outputAmount = outputAmountWithFee * 967 / 1000;
     }
 
     function getOutputPrice(
@@ -57,9 +83,10 @@ contract Exchange is ERC20 {
         uint inputReserve,
         uint outputReserve
     ) public pure returns (uint inputAmount) {
-        inputAmount = outputAmount * 1000 / 997;
-        // Implemented in CSMM Price Discovery Method.
-        // #TODO: Should change to CPMM.
+        uint numerator = inputReserve * outputAmount;
+        uint denominator = outputReserve - outputAmount;
+        uint inputAmountWithoutFee = numerator / denominator;
+        inputAmount = inputAmountWithoutFee * 1000 / 967;
     }
 
     function etherToTokenInput(
