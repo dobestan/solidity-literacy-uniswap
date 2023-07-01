@@ -6,7 +6,7 @@ const TOKEN_NAMES = ["Dog", "Cat", "Lion", "Elephant", "Rabbit"];
 
 async function main() {
     const [deployer] = await ethers.getSigners();
-    
+
     console.log(
         "Deploying contracts with the account:",
         deployer.address
@@ -24,14 +24,15 @@ async function main() {
     for (let i = 0; i < TOKEN_NAMES.length; i++) {
         let tokenName = TOKEN_NAMES[i];
         let tokenSymbol = tokenName.toUpperCase();
-        
+
         // Deploy ERC20 Token
         const token = await Token.deploy(tokenName, tokenSymbol);
         await token.deployed();
         console.log(`${tokenName} Token deployed to:`, token.address);
-        
+
         // Create Exchange
-        await factory.createExchange(token.address);
+        const createExchangeTx = await factory.createExchange(token.address);
+        await createExchangeTx.wait(); // Wait for the transaction to be mined
         const exchangeAddress = await factory.getExchange(token.address);
         console.log(`Exchange for ${tokenName} created at:`, exchangeAddress);
     }

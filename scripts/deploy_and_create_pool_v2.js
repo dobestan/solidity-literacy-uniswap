@@ -1,26 +1,19 @@
-const { ethers, deployments } = require("hardhat");
+const { ethers } = require("hardhat");
 const { utils } = require("ethers");
-
 
 const UNISWAP_FACTORY_ADDRESS = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 
-
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const { deploy } = deployments;
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const ERC20Mintable = await deploy("ERC20Mintable", {
-    from: deployer.address,
-    args: ["Literacy Meme Token", "LMT"],
-    log: true,
-  });
+  const ERC20Mintable = await ethers.getContractFactory("ERC20Mintable");
+  const token = await ERC20Mintable.deploy("Literacy Meme Token", "LMT");
+  await token.deployed();
 
-  console.log("ERC20Mintable deployed to:", ERC20Mintable.address);
-
-  const token = await ethers.getContractAt("ERC20Mintable", ERC20Mintable.address);
+  console.log("ERC20Mintable deployed to:", token.address);
 
   await token.mint(deployer.address, ethers.utils.parseEther("100000"));
   console.log("Minted 100,000 LMT tokens");
@@ -38,10 +31,11 @@ async function main() {
   const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from now
 
   // Approve the Uniswap Router to spend the tokens
-  await token.approve(UNISWAP_ROUTER_ADDRESS, amountTokenDesired);
+  const approveTx = await token.approve(UNISWAP_ROUTER_ADDRESS, amountTokenDesired);
+  await approveTx.wait();
 
   // Add liquidity
-  await router.addLiquidityETH(
+  const addLiquidityTx = await router.addLiquidityETH(
     token.address,
     amountTokenDesired,
     amountTokenDesired,
@@ -53,6 +47,7 @@ async function main() {
         gasLimit: 10000000,
     },
   );
+  await addLiquidityTx.wait();
 
   console.log("Added liquidity to Uniswap V2");
   console.log("https://app.uniswap.org/#/swap?use=V2");
