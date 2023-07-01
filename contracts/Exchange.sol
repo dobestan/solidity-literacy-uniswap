@@ -88,10 +88,7 @@ contract Exchange is ERC20 {
         uint inputReserve,
         uint outputReserve
     ) public pure returns (uint outputAmount) {
-        uint numerator = inputAmount * outputReserve;
-        uint denominator = inputAmount + inputReserve;
-        uint outputAmountWithFee = numerator / denominator;
-        outputAmount = outputAmountWithFee * 967 / 1000;
+        outputAmount = inputAmount * 967 / 1000;  // CSMM
     }
 
     /// @notice Calculate the input amount required for a trade given the output amount, input reserve, and output reserve
@@ -105,10 +102,7 @@ contract Exchange is ERC20 {
         uint inputReserve,
         uint outputReserve
     ) public pure returns (uint inputAmount) {
-        uint numerator = inputReserve * outputAmount;
-        uint denominator = outputReserve - outputAmount;
-        uint inputAmountWithoutFee = numerator / denominator;
-        inputAmount = inputAmountWithoutFee * 1000 / 967;
+        inputAmount = outputAmount * 1000 / 967;  // CSMM
     }
 
     function etherToTokenInput(
