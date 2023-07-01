@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
+require("hardhat-docgen");
 
 
 module.exports = {
@@ -20,4 +21,8 @@ module.exports = {
             default: 0,
         },
     },
+    docgen: {
+      path: './docs',
+      clear: true,
+    }
 };

@@ -77,6 +77,12 @@ contract Exchange is ERC20 {
         return (etherAmount, tokenAmount);
     }
 
+    /// @notice Calculate the output amount of a trade given the input amount, input reserve, and output reserve
+    /// @dev This function implements the "x * y = k" formula for constant product automated market makers
+    /// @param inputAmount The amount of input token being supplied
+    /// @param inputReserve The total reserve of input token
+    /// @param outputReserve The total reserve of output token
+    /// @return outputAmount The amount of output token that will be received
     function getInputPrice(
         uint inputAmount,
         uint inputReserve,
@@ -88,6 +94,12 @@ contract Exchange is ERC20 {
         outputAmount = outputAmountWithFee * 967 / 1000;
     }
 
+    /// @notice Calculate the input amount required for a trade given the output amount, input reserve, and output reserve
+    /// @dev This function implements the "x * y = k" formula for constant product automated market makers
+    /// @param outputAmount The amount of output token desired
+    /// @param inputReserve The total reserve of input token
+    /// @param outputReserve The total reserve of output token
+    /// @return inputAmount The amount of input token that needs to be provided
     function getOutputPrice(
         uint outputAmount,
         uint inputReserve,
